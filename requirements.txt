@@ -1,0 +1,13 @@
+binance-connector>=3.0.0
+uvicorn
+fastapi
+pandas
+numpy
+python-dotenv
+redis
+prometheus-client
+
+# Testing dependencies
+pytest
+pytest-cov
+pytest-mock
