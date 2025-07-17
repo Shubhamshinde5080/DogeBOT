@@ -21,6 +21,8 @@ def setup_environment():
     # Always override any auto-generated BASE_URL from Railway
     if os.getenv("BINANCE_BASE_URL"):
         os.environ["BASE_URL"] = os.getenv("BINANCE_BASE_URL")
+    elif os.getenv("FORCE_TESTNET"):
+        os.environ["BASE_URL"] = "https://testnet.binance.vision"
     else:
         os.environ["BASE_URL"] = "https://testnet.binance.vision"
     
