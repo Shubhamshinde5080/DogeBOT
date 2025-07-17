@@ -17,8 +17,11 @@ def setup_environment():
     if os.getenv("BINANCE_API_SECRET") and not os.getenv("API_SECRET"):
         os.environ["API_SECRET"] = os.getenv("BINANCE_API_SECRET")
     
-    # Set default base URL if not provided
-    if not os.getenv("BASE_URL"):
+    # Force correct BASE_URL - Railway might be setting this to port number
+    # Always override any auto-generated BASE_URL from Railway
+    if os.getenv("BINANCE_BASE_URL"):
+        os.environ["BASE_URL"] = os.getenv("BINANCE_BASE_URL")
+    else:
         os.environ["BASE_URL"] = "https://testnet.binance.vision"
     
     # Map FDUSD-specific variables
@@ -35,6 +38,10 @@ def setup_environment():
     print(f"   BASE_URL: {os.getenv('BASE_URL')}")
     print(f"   DAILY_TARGET: {os.getenv('DAILY_TARGET', '6')}")
     print(f"   FDUSD_CAP: {os.getenv('FDUSD_CAP', '1100')}")
+    
+    # DEBUG: Show ALL environment variables that might be interfering
+    railway_vars = {k: v for k, v in os.environ.items() if any(term in k.upper() for term in ['BASE', 'URL', 'PORT', 'API', 'BINANCE'])}
+    print(f"🔍 DEBUG: Railway environment variables: {railway_vars}")
 
 if __name__ == "__main__":
     setup_environment()
