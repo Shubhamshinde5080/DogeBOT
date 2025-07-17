@@ -113,8 +113,20 @@ def handle_kline(_, raw_msg: str):
         
         logger.info(f"📊 Technical Analysis - Price: {price:.6f}, ATR: {atr_now:.6f}, BB: {df['bb'].iat[-1]:.3f}, EMA_ratio: {price/df['ema'].iat[-1]:.4f}")
 
+        # Check for 2% drop in recent candles (CRITICAL MISSING CONDITION)
+        def check_recent_drop(df_data, lookback=2):
+            """Ensure we're buying the dip, not buying strength"""
+            if len(df_data) < lookback + 1:
+                return False
+            recent_high = df_data['high'].tail(lookback).max()
+            current_price = df_data['close'].iat[-1]
+            drop_percent = (recent_high - current_price) / recent_high
+            return drop_percent >= 0.02  # Require 2% pullback
+        
+        drop_confirmed = check_recent_drop(df)
+
         if not strategy.cycle:
-            logger.info(f"⏳ Waiting for entry – BB_condition: {df['bb'].iat[-1]:.3f} <= 0.30, EMA_condition: {price/df['ema'].iat[-1]:.4f} > 0.95")
+            logger.info(f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f}≤0.30, EMA: {price/df['ema'].iat[-1]:.4f}>0.95, Drop: {drop_confirmed}")
 
         # More flexible entry conditions for testing:
         # Original: df["bb"].iat[-1] <= 0.15 and price > 0.97 * df["ema"].iat[-1]
@@ -122,8 +134,9 @@ def handle_kline(_, raw_msg: str):
         bb_condition = df["bb"].iat[-1] <= 0.30  # Increased from 0.15 to 0.30
         ema_condition = price > 0.95 * df["ema"].iat[-1]  # Decreased from 0.97 to 0.95
         
-        if not strategy.cycle and bb_condition and ema_condition:
-            logger.info(f"🎯 Entry conditions met! BB={df['bb'].iat[-1]:.3f} <= 0.30, Price/EMA={price/df['ema'].iat[-1]:.4f} > 0.95")
+        # CRITICAL: Add the missing 2% drop condition to prevent buying strength
+        if not strategy.cycle and bb_condition and ema_condition and drop_confirmed:
+            logger.info(f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f}≤0.30, EMA={price/df['ema'].iat[-1]:.4f}>0.95, 2% Drop=True")
             strategy.start_cycle(price, atr_now)
 
         strategy.on_tick(price, atr_now)
