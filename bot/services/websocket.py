@@ -95,6 +95,7 @@ def handle_kline(_, raw_msg: str):
         logger.debug(f"📊 Candles collected: {len(bars)}/10 (need 10 for strategy)")
 
         if len(bars) < 10:
+            logger.info(f"⏳ Still collecting candles: {len(bars)}/10 needed")
             return
 
         df = bars.iloc[-30:].copy()
@@ -104,11 +105,16 @@ def handle_kline(_, raw_msg: str):
 
         price   = df["close"].iat[-1]
         atr_now = df["atr"].iat[-1]
+        
+        # Better ATR debugging
         if pd.isna(atr_now):
+            logger.warning(f"⚠️ ATR is NaN, skipping this candle. Available data: {len(df)} candles")
             return
+        
+        logger.info(f"📊 Technical Analysis - Price: {price:.6f}, ATR: {atr_now:.6f}, BB: {df['bb'].iat[-1]:.3f}, EMA_ratio: {price/df['ema'].iat[-1]:.4f}")
 
         if not strategy.cycle:
-            logger.info(f"⏳ Waiting – price={price:.6f}, ATR={atr_now:.6f}, BB={df['bb'].iat[-1]:.3f}, EMA_ratio={price/df['ema'].iat[-1]:.4f}")
+            logger.info(f"⏳ Waiting for entry – BB_condition: {df['bb'].iat[-1]:.3f} <= 0.30, EMA_condition: {price/df['ema'].iat[-1]:.4f} > 0.95")
 
         # More flexible entry conditions for testing:
         # Original: df["bb"].iat[-1] <= 0.15 and price > 0.97 * df["ema"].iat[-1]
