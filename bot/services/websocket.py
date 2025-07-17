@@ -5,6 +5,12 @@ from bot.core.strategy import GridStrategy
 from bot.core.order_mgr import OrderMgr
 from bot.core.indicators import atr, ema, boll_pct
 
+# DEBUG: Log environment variables to identify BASE_URL issue
+logging.basicConfig(level=logging.INFO)
+logging.info(f"🔍 DEBUG: BASE_URL env = {os.getenv('BASE_URL')!r}")
+logging.info(f"🔍 DEBUG: API_KEY env = {(os.getenv('API_KEY') or 'None')[:20]}...")
+logging.info(f"🔍 DEBUG: BINANCE_API_KEY env = {(os.getenv('BINANCE_API_KEY') or 'None')[:20]}...")
+
 # Global configuration
 DAILY_TARGET = float(os.getenv("DAILY_TARGET", 6.0))
 _last_target_date: date = None
