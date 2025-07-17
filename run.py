@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from bot.utils.env_mapper import setup_environment
 from bot.app import app
@@ -6,4 +7,5 @@ from bot.app import app
 setup_environment()
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    port = int(os.getenv('PORT', 8000))
+    uvicorn.run(app, host='0.0.0.0', port=port)
