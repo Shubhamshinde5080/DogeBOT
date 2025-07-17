@@ -4,16 +4,15 @@
 
 ### Step 1: Prepare Your Repository
 ```bash
-# Ensure all files are committed
-git add .
-git commit -m "DogeBot ready for deployment"
-git push origin main
+# Your repository is already pushed to GitHub! ✅
+# Repository: https://github.com/Shubhamshinde5080/DogeBOT
+# All files committed with FDUSD integration complete
 ```
 
 ### Step 2: Deploy to Railway
 1. Go to [Railway.app](https://railway.app)
 2. Click "New Project" → "Deploy from GitHub repo"
-3. Select your DogeBot repository
+3. Select your **DogeBOT** repository (https://github.com/Shubhamshinde5080/DogeBOT)
 4. Railway will automatically detect the Dockerfile and deploy
 
 ### Step 3: Configure Environment Variables

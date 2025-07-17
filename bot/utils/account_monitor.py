@@ -13,9 +13,9 @@ class AccountMonitor:
     def __init__(self):
         load_dotenv()
         
-        # Get environment variables
-        api_key = os.getenv('API_KEY')
-        api_secret = os.getenv('API_SECRET')
+        # Get environment variables - support both Railway.app and local names
+        api_key = os.getenv('BINANCE_API_KEY') or os.getenv('API_KEY')
+        api_secret = os.getenv('BINANCE_API_SECRET') or os.getenv('API_SECRET')
         base_url = os.getenv('BASE_URL', 'https://testnet.binance.vision')
         
         print(f"🔧 Initializing with base_url: {base_url}")
