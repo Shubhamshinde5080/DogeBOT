@@ -3,6 +3,14 @@ import logging
 from dataclasses import dataclass, field
 from .indicators import vwap
 
+# Import notifications
+try:
+    from bot.utils.notifications import notify_trade, notify_target_hit
+except ImportError:
+    # Fallback if notifications not available
+    def notify_trade(*args, **kwargs): pass
+    def notify_target_hit(*args, **kwargs): pass
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -54,9 +62,16 @@ class GridStrategy:
         self.order_mgr.post_limit_maker("SELL", price+self.step, qty)
 
     def handle_sell_fill(self, price, buy_price, qty):
-        self.realised += (price-buy_price)*qty
+        profit = (price-buy_price)*qty
+        self.realised += profit
         self.ladders = [l for l in self.ladders if not (l.buy==buy_price and l.qty==qty)]
+        
+        logger.info(f"💰 SELL FILL: +${profit:.4f} profit | Total PnL: ${self.realised:.4f} | Target: ${self.profit_target}")
+        notify_trade("SELL", price, qty, self.realised)
+        
         if self.realised >= self.profit_target:
+            logger.info(f"🎯 DAILY TARGET HIT! PnL: ${self.realised:.4f} >= ${self.profit_target} - Closing all positions")
+            notify_target_hit(self.realised, self.profit_target)
             self.close_all(price)
 
     def close_all(self, mkt):

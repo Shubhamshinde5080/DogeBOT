@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 
 def atr(df: pd.DataFrame, win: int = 14) -> pd.Series:
+    # Safety check: need enough data for ATR calculation
+    if len(df) < win:
+        return pd.Series([np.nan] * len(df), index=df.index)
+    
     tr = np.maximum.reduce([
         df['high'] - df['low'],
         (df['high'] - df['close'].shift()).abs(),
@@ -10,6 +14,10 @@ def atr(df: pd.DataFrame, win: int = 14) -> pd.Series:
     return pd.Series(tr, index=df.index).rolling(win).mean()
 
 def boll_pct(df: pd.DataFrame, win: int = 20, dev: int = 2) -> pd.Series:
+    # Safety check: need enough data for Bollinger calculation  
+    if len(df) < win:
+        return pd.Series([np.nan] * len(df), index=df.index)
+        
     mb = df['close'].rolling(win).mean()
     sd = df['close'].rolling(win).std()
     upper = mb + dev*sd
