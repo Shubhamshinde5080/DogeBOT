@@ -33,13 +33,17 @@ IS_TEST = "testnet" in os.getenv("BASE_URL", "")
 # ------------ 1.  point to the correct stream URL -------------
 # Note: Binance testnet doesn't have a separate WebSocket endpoint for market data
 # Use the live WebSocket for market data even when trading on testnet
-STREAM_URL = "wss://stream.binance.com:9443/ws"
+BASE = os.getenv("BINANCE_BASE_URL", "")
+if "testnet" in BASE:
+    STREAM_URL = "wss://testnet.binance.vision/ws"
+else:
+    STREAM_URL = "wss://stream.binance.com:9443/ws"
 
 # Initialize components  
 order_mgr = OrderMgr(symbol=SYMBOL)  # Explicitly pass the symbol to match
 strategy  = GridStrategy(order_mgr=order_mgr)
 
-bars = pd.DataFrame(columns=["open", "high", "low", "close"])
+bars = pd.DataFrame(columns=["open", "high", "low", "close","volume"])
 
 # ------------ 2.  message handlers -------------------------------
 def handle_kline(_, raw_msg: str):
@@ -94,7 +98,7 @@ def handle_kline(_, raw_msg: str):
         
         logger.debug(f"📊 Candles collected: {len(bars)}/10 (need 10 for strategy)")
 
-        if len(bars) < 10:
+        if len(bars) < 20:
             logger.info(f"⏳ Still collecting candles: {len(bars)}/10 needed")
             return
 
@@ -126,8 +130,10 @@ def handle_kline(_, raw_msg: str):
         drop_confirmed = check_recent_drop(df)
 
         if not strategy.cycle:
-            logger.info(f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f}≤0.30, EMA: {price/df['ema'].iat[-1]:.4f}>0.95, Drop: {drop_confirmed}")
-
+       logger.info(
+    f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f} ≤ 0.30, "
+    f"EMA: {price/df['ema'].iat[-1]:.4f} > 0.95, Drop: {drop_confirmed}"
+)
         # More flexible entry conditions for testing:
         # Original: df["bb"].iat[-1] <= 0.15 and price > 0.97 * df["ema"].iat[-1]
         # Test conditions: More lenient for easier triggering
@@ -136,7 +142,10 @@ def handle_kline(_, raw_msg: str):
         
         # CRITICAL: Add the missing 2% drop condition to prevent buying strength
         if not strategy.cycle and bb_condition and ema_condition and drop_confirmed:
-            logger.info(f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f}≤0.30, EMA={price/df['ema'].iat[-1]:.4f}>0.95, 2% Drop=True")
+        logger.info(
+    f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f} ≤ 0.30, "
+    f"EMA={price/df['ema'].iat[-1]:.4f} > 0.95, 2% Drop=True"
+)
             strategy.start_cycle(price, atr_now)
 
         strategy.on_tick(price, atr_now)

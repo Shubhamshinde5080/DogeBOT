@@ -22,7 +22,7 @@ def atr(df: pd.DataFrame, win: int = 14) -> pd.Series:
         first_valid_idx = atr_series.first_valid_index()
         if first_valid_idx is not None:
             # Fill earlier NaN values with the first valid ATR value
-            atr_series = atr_series.fillna(method='bfill')
+            atr_series = atr_series.bfill()
             
     return atr_series
 
@@ -31,8 +31,8 @@ def boll_pct(df: pd.DataFrame, win: int = 20, dev: int = 2) -> pd.Series:
     if len(df) < win:
         return pd.Series([np.nan] * len(df), index=df.index)
         
-    mb = df['close'].rolling(win).mean()
-    sd = df['close'].rolling(win).std()
+     mb = df['close'].rolling(win, min_periods=1).mean()
+    sd = df['close'].rolling(win, min_periods=1).std()
     upper = mb + dev*sd
     lower = mb - dev*sd
     return (df['close'] - lower)/(upper - lower)
@@ -45,5 +45,5 @@ def vwap(df: pd.DataFrame) -> pd.Series:
     typical_price = (df['high'] + df['low'] + df['close']) / 3
     return (typical_price * df['volume']).cumsum() / df['volume'].cumsum()
 
-def vwap(prices, qtys):
+def vwap_list(prices, qtys):
     return (np.array(prices)*np.array(qtys)).sum() / np.array(qtys).sum()
