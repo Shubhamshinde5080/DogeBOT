@@ -7,6 +7,7 @@ from bot.core.indicators import atr, ema, boll_pct
 
 # DEBUG: Log environment variables to identify BASE_URL issue
 logging.basicConfig(level=logging.INFO)
+logging.info(f"🔍 DEBUG: BINANCE_BASE_URL env = {os.getenv('BINANCE_BASE_URL')!r}")
 logging.info(f"🔍 DEBUG: BASE_URL env = {os.getenv('BASE_URL')!r}")
 logging.info(f"🔍 DEBUG: API_KEY env = {(os.getenv('API_KEY') or 'None')[:20]}...")
 logging.info(f"🔍 DEBUG: BINANCE_API_KEY env = {(os.getenv('BINANCE_API_KEY') or 'None')[:20]}...")
@@ -28,12 +29,12 @@ logger = logging.getLogger(__name__)
 
 SYMBOL  = "DOGEFDUSD"  # Your actual trading pair
 # read from .env so you can flip to live later
-IS_TEST = "testnet" in os.getenv("BASE_URL", "")
+IS_TEST = "testnet" in (os.getenv("BINANCE_BASE_URL") or os.getenv("BASE_URL", ""))
 
 # ------------ 1.  WebSocket configuration -------------
 # Note: For testnet trading, we still use LIVE market data streams
 # because Binance testnet doesn't provide separate WebSocket streams
-BASE = os.getenv("BASE_URL", "")  # Use BASE_URL which is set in Railway
+BASE = os.getenv("BINANCE_BASE_URL") or os.getenv("BASE_URL", "")  # Support both Railway and local
 if "testnet" in BASE:
     # For testnet trading, use live market data streams
     STREAM_URL = "wss://stream.binance.com:9443"
