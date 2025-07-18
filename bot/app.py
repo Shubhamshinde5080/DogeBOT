@@ -27,18 +27,19 @@ except Exception as e:
 
 app = FastAPI()
 
-# Start WebSocket immediately when module is imported
-try:
-    import threading
-    def start_ws():
-        asyncio.run(start_websocket())
-    
-    ws_thread = threading.Thread(target=start_ws, daemon=True)
-    ws_thread.start()
-except Exception as e:
-    print(f"❌ Failed to start WebSocket thread: {e}")
-    import traceback
-    traceback.print_exc()
+# Start WebSocket as background task when app starts (better than threading)
+@app.on_event("startup")
+async def startup_event():
+    """Start WebSocket connection when FastAPI starts"""
+    try:
+        print("🚀 Starting WebSocket connection...")
+        import asyncio
+        asyncio.create_task(start_websocket())
+        print("✅ WebSocket task created successfully")
+    except Exception as e:
+        print(f"❌ Failed to start WebSocket: {e}")
+        import traceback
+        traceback.print_exc()
 
 # Initialize metrics with safe registration
 try:
@@ -56,7 +57,29 @@ except ValueError:
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    """Health check endpoint"""
+    return {
+        "status": "ok", 
+        "bot_active": True,
+        "realised_pnl": strategy.realised,
+        "open_ladders": len(strategy.ladders)
+    }
+
+@app.get("/status")
+def status():
+    """Detailed bot status"""
+    return {
+        "strategy": {
+            "realised_pnl": strategy.realised,
+            "open_ladders": len(strategy.ladders),
+            "cycle_active": strategy.cycle is not None
+        },
+        "environment": {
+            "symbol": "DOGEFDUSD",
+            "daily_target": os.getenv("DAILY_TARGET", "6.0"),
+            "base_url": os.getenv("BINANCE_BASE_URL") or os.getenv("BASE_URL", "NOT_SET")
+        }
+    }
 
 @app.get("/metrics")
 def metrics():
