@@ -131,24 +131,25 @@ def handle_kline(_, raw_msg: str):
         
         drop_confirmed = check_recent_drop(df)
 
-        if not strategy.cycle:
-            logger.info(
-                f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f} ≤ 0.30, "
-                f"EMA: {price/df['ema'].iat[-1]:.4f} > 0.95, Drop: {drop_confirmed}"
-            )
         # More flexible entry conditions for testing:
         # Original: df["bb"].iat[-1] <= 0.15 and price > 0.97 * df["ema"].iat[-1]
         # Test conditions: More lenient for easier triggering
         bb_condition = df["bb"].iat[-1] <= 0.30  # Increased from 0.15 to 0.30
         ema_condition = price > 0.95 * df["ema"].iat[-1]  # Decreased from 0.97 to 0.95
-        
-        # CRITICAL: Add the missing 2% drop condition to prevent buying strength
-        if not strategy.cycle and bb_condition and ema_condition and drop_confirmed:
+
+        if not strategy.cycle:
             logger.info(
-                f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f} ≤ 0.30, "
-                f"EMA={price/df['ema'].iat[-1]:.4f} > 0.95, 2% Drop=True"
+                f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f} ≤ 0.30, "
+                f"EMA: {price/df['ema'].iat[-1]:.4f} > 0.95, Drop: {drop_confirmed}"
             )
-            strategy.start_cycle(price, atr_now)
+            
+            # CRITICAL: Check all conditions and trigger buy if met
+            if bb_condition and ema_condition and drop_confirmed:
+                logger.info(
+                    f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f} ≤ 0.30, "
+                    f"EMA={price/df['ema'].iat[-1]:.4f} > 0.95, 2% Drop=True"
+                )
+                strategy.start_cycle(price, atr_now)
 
         strategy.on_tick(price, atr_now)
         
