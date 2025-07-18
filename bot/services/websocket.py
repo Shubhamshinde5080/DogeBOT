@@ -67,8 +67,6 @@ def handle_kline(_, raw_msg: str):
     if strategy.realised >= DAILY_TARGET:
         logger.info(f"🎯 Daily target ${DAILY_TARGET:.2f} reached – waiting for tomorrow")
         return
-        logger.info(f"🎯 Daily target ${DAILY_TARGET:.2f} reached – waiting for tomorrow")
-        return
 
     try:
         data = json.loads(raw_msg)
