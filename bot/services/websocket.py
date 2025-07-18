@@ -142,10 +142,10 @@ def handle_kline(_, raw_msg: str):
         
         # CRITICAL: Add the missing 2% drop condition to prevent buying strength
         if not strategy.cycle and bb_condition and ema_condition and drop_confirmed:
-        logger.info(
-    f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f} ≤ 0.30, "
-    f"EMA={price/df['ema'].iat[-1]:.4f} > 0.95, 2% Drop=True"
-)
+            logger.info(
+                f"🎯 ALL CONDITIONS MET! BB={df['bb'].iat[-1]:.3f} ≤ 0.30, "
+                f"EMA={price/df['ema'].iat[-1]:.4f} > 0.95, 2% Drop=True"
+            )
             strategy.start_cycle(price, atr_now)
 
         strategy.on_tick(price, atr_now)
