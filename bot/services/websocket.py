@@ -130,10 +130,10 @@ def handle_kline(_, raw_msg: str):
         drop_confirmed = check_recent_drop(df)
 
         if not strategy.cycle:
-       logger.info(
-    f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f} ≤ 0.30, "
-    f"EMA: {price/df['ema'].iat[-1]:.4f} > 0.95, Drop: {drop_confirmed}"
-)
+            logger.info(
+                f"⏳ Waiting for entry – BB: {df['bb'].iat[-1]:.3f} ≤ 0.30, "
+                f"EMA: {price/df['ema'].iat[-1]:.4f} > 0.95, Drop: {drop_confirmed}"
+            )
         # More flexible entry conditions for testing:
         # Original: df["bb"].iat[-1] <= 0.15 and price > 0.97 * df["ema"].iat[-1]
         # Test conditions: More lenient for easier triggering
