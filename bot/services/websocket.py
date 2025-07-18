@@ -30,14 +30,17 @@ SYMBOL  = "DOGEFDUSD"  # Your actual trading pair
 # read from .env so you can flip to live later
 IS_TEST = "testnet" in os.getenv("BASE_URL", "")
 
-# ------------ 1.  point to the correct stream URL -------------
-# Note: Binance testnet doesn't have a separate WebSocket endpoint for market data
-# Use the live WebSocket for market data even when trading on testnet
+# ------------ 1.  WebSocket configuration -------------
+# Note: For testnet trading, we still use LIVE market data streams
+# because Binance testnet doesn't provide separate WebSocket streams
 BASE = os.getenv("BASE_URL", "")  # Use BASE_URL which is set in Railway
 if "testnet" in BASE:
-    STREAM_URL = "wss://testnet.binance.vision/ws"
+    # For testnet trading, use live market data streams
+    STREAM_URL = "wss://stream.binance.com:9443"
+    logger.info("🧪 Testnet mode: Using live market data streams")
 else:
-    STREAM_URL = "wss://stream.binance.com:9443/ws"
+    STREAM_URL = "wss://stream.binance.com:9443"
+    logger.info("🚀 Live mode: Using live market data streams")
 
 # Initialize components  
 order_mgr = OrderMgr(symbol=SYMBOL)  # Explicitly pass the symbol to match
@@ -166,11 +169,10 @@ def handle_error(_, err):
 async def start_websocket():
     """Start the websocket connection with new v3+ API"""
     try:
-        logger.info(f"🔌 Connecting to WebSocket: {STREAM_URL}")
+        logger.info(f"🔌 Connecting to WebSocket for {SYMBOL} market data...")
         
-        # Initialize with handlers in constructor (v3+ API)
+        # Initialize without custom stream_url - let Binance client handle it
         ws = SpotWebsocketStreamClient(
-            stream_url=STREAM_URL,
             on_message=handle_kline,
             on_error=handle_error,
         )
