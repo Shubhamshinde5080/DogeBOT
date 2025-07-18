@@ -33,7 +33,7 @@ IS_TEST = "testnet" in os.getenv("BASE_URL", "")
 # ------------ 1.  point to the correct stream URL -------------
 # Note: Binance testnet doesn't have a separate WebSocket endpoint for market data
 # Use the live WebSocket for market data even when trading on testnet
-BASE = os.getenv("BINANCE_BASE_URL", "")
+BASE = os.getenv("BASE_URL", "")  # Use BASE_URL which is set in Railway
 if "testnet" in BASE:
     STREAM_URL = "wss://testnet.binance.vision/ws"
 else:

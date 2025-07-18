@@ -31,7 +31,7 @@ def boll_pct(df: pd.DataFrame, win: int = 20, dev: int = 2) -> pd.Series:
     if len(df) < win:
         return pd.Series([np.nan] * len(df), index=df.index)
         
-     mb = df['close'].rolling(win, min_periods=1).mean()
+    mb = df['close'].rolling(win, min_periods=1).mean()
     sd = df['close'].rolling(win, min_periods=1).std()
     upper = mb + dev*sd
     lower = mb - dev*sd
